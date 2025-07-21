@@ -49,6 +49,9 @@ blueprint:
         pin_control_panel:
           name: Control Panel Pincode
           description: The Valid PIN Code to be used for controlling Control Panel.
+        context_id_control_panel:
+          name: Control Panel Context Id
+          description: "The Context Id to be passed when arming the Control Panel. \nYou can use \"{random}\" to generate a random id."
     alarmo_actions:
       name: Actions Triggered by Control Panel State Change
       description: "Define the actions to be performed whenever the alarm panel state changes (e.g., armed, disarmed, triggered)."
