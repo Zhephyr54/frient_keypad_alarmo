@@ -343,10 +343,10 @@ actions:
                       '{{ trigger.payload_json.action_code in pin_list and trigger.payload_json.action
                       == "arm_all_zones" }}'
                 sequence:
-                  - action: alarm_control_panel.alarm_arm_away
-                    target:
-                      entity_id: !input control_panel
+                  - action: alarmo.arm
                     data:
+                      mode: away
+                      entity_id: !input control_panel
                       code: !input pin_control_panel
                       context_id: "{{ context_id_transaction_prefix }}{{ trigger.payload_json.action_transaction }}"
               - conditions:
@@ -355,10 +355,10 @@ actions:
                       '{{ trigger.payload_json.action_code in pin_list and trigger.payload_json.action
                       == "arm_day_zones" }}'
                 sequence:
-                  - action: alarm_control_panel.alarm_arm_home
-                    target:
-                      entity_id: !input control_panel
+                  - action: alarmo.arm
                     data:
+                      mode: home
+                      entity_id: !input control_panel
                       code: !input pin_control_panel
                       context_id: "{{ context_id_transaction_prefix }}{{ trigger.payload_json.action_transaction }}"
               - conditions:
@@ -367,10 +367,10 @@ actions:
                       '{{ trigger.payload_json.action_code in pin_list and trigger.payload_json.action
                       == "arm_night_zones" }}'
                 sequence:
-                  - action: alarm_control_panel.alarm_arm_night
-                    target:
-                      entity_id: !input control_panel
+                  - action: alarmo.arm
                     data:
+                      mode: night
+                      entity_id: !input control_panel
                       code: !input pin_control_panel
                       context_id: "{{ context_id_transaction_prefix }}{{ trigger.payload_json.action_transaction }}"
               - conditions:
@@ -379,10 +379,9 @@ actions:
                       '{{ trigger.payload_json.action_code in pin_list and trigger.payload_json.action
                       == "disarm" }}'
                 sequence:
-                  - action: alarm_control_panel.alarm_disarm
-                    target:
-                      entity_id: !input control_panel
+                  - action: alarmo.disarm
                     data:
+                      entity_id: !input control_panel
                       code: !input pin_control_panel
                       context_id: "{{ context_id_transaction_prefix }}{{ trigger.payload_json.action_transaction }}"
               - conditions:
