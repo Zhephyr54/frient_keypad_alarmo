@@ -51,7 +51,7 @@ blueprint:
           description: The Valid PIN Code to be used for controlling Control Panel.
         context_id_control_panel:
           name: Control Panel Context Id
-          description: "The Context Id to be passed when arming the Control Panel. \nYou can use \"{random}\" to generate a random id."
+          description: "The Context Id to be passed when arming or disarming the Control Panel."
     alarmo_actions:
       name: Actions Triggered by Control Panel State Change
       description: "Define the actions to be performed whenever the alarm panel state changes (e.g., armed, disarmed, triggered)."
@@ -294,6 +294,7 @@ actions:
                       entity_id: !input control_panel
                     data:
                       code: !input pin_control_panel
+                      context_id: "{{ context_id_control_panel }}"
               - conditions:
                   - condition: template
                     value_template:
@@ -305,6 +306,7 @@ actions:
                       entity_id: !input control_panel
                     data:
                       code: !input pin_control_panel
+                      context_id: "{{ context_id_control_panel }}"
               - conditions:
                   - condition: template
                     value_template:
@@ -316,6 +318,7 @@ actions:
                       entity_id: !input control_panel
                     data:
                       code: !input pin_control_panel
+                      context_id: "{{ context_id_control_panel }}"
               - conditions:
                   - condition: template
                     value_template:
@@ -327,6 +330,7 @@ actions:
                       entity_id: !input control_panel
                     data:
                       code: !input pin_control_panel
+                      context_id: "{{ context_id_control_panel }}"
               - conditions:
                   - condition: template
                     value_template: '{{ trigger.payload_json.action == "emergency" }}'
