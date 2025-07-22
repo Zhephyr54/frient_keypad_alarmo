@@ -167,6 +167,7 @@ blueprint:
             action: {}
   source_url: https://github.com/Bygood91/frient_keypad_alarmo/blob/main/frient_keypad_with_alarmo.yaml
 variables:
+  context_id_transaction_prefix: "tr_"
   pin_list_var: !input pin_list
   pin_list: "{{ pin_list_var.split(';') }}"
   custom_pincode_1: !input custom_pincode_1
@@ -212,7 +213,15 @@ actions:
           - action: mqtt.publish
             data:
               topic: !input z2m_keypad_path_set
-              payload: "{\n\"arm_mode\": \n  {\n  \"mode\": \"exit_delay\"\n  }\n}"
+              payload: >
+                {
+                  "arm_mode": {
+                    "mode": "exit_delay"
+                    {% if trigger.event.data.context_id is not none and trigger.event.data.context_id.startswith(context_id_transaction_prefix) %}
+                      "transaction": "{{ trigger.event.data.context_id[context_id_transaction_prefix | length:] }}"
+                    {% endif %}
+                  }
+                }
           - choose:
             default: !input action_arming
       - conditions:
@@ -222,7 +231,15 @@ actions:
           - action: mqtt.publish
             data:
               topic: !input z2m_keypad_path_set
-              payload: "{\n \"arm_mode\": \n  {\n   \"mode\": \"arm_all_zones\"\n  }\n}"
+              payload: >
+                {
+                  "arm_mode": {
+                    "mode": "arm_all_zones"
+                    {% if trigger.event.data.context_id is not none and trigger.event.data.context_id.startswith(context_id_transaction_prefix) %}
+                      "transaction": "{{ trigger.event.data.context_id[context_id_transaction_prefix | length:] }}"
+                    {% endif %}
+                  }
+                }
           - choose:
             default: !input action_armed_away
       - conditions:
@@ -232,7 +249,15 @@ actions:
           - action: mqtt.publish
             data:
               topic: !input z2m_keypad_path_set
-              payload: "{\n \"arm_mode\": \n  {\n    \"mode\": \"disarm\"\n  }\n}"
+              payload: >
+                {
+                  "arm_mode": {
+                    "mode": "disarm"
+                    {% if trigger.event.data.context_id is not none and trigger.event.data.context_id.startswith(context_id_transaction_prefix) %}
+                      "transaction": "{{ trigger.event.data.context_id[context_id_transaction_prefix | length:] }}"
+                    {% endif %}
+                  }
+                }
           - choose:
             default: !input action_disarmed
       - conditions:
@@ -242,7 +267,15 @@ actions:
           - action: mqtt.publish
             data:
               topic: !input z2m_keypad_path_set
-              payload: "{\n \"arm_mode\": \n  {\n   \"mode\": \"arm_day_zones\"\n  }\n}"
+              payload: >
+                {
+                  "arm_mode": {
+                    "mode": "arm_day_zones"
+                    {% if trigger.event.data.context_id is not none and trigger.event.data.context_id.startswith(context_id_transaction_prefix) %}
+                      "transaction": "{{ trigger.event.data.context_id[context_id_transaction_prefix | length:] }}"
+                    {% endif %}
+                  }
+                }
           - choose:
             default: !input action_armed_home
       - conditions:
@@ -252,7 +285,15 @@ actions:
           - action: mqtt.publish
             data:
               topic: !input z2m_keypad_path_set
-              payload: "{\n \"arm_mode\": \n  {\n   \"mode\": \"arm_night_zones\"\n  }\n}"
+              payload: >
+                {
+                  "arm_mode": {
+                    "mode": "arm_night_zones"
+                    {% if trigger.event.data.context_id is not none and trigger.event.data.context_id.startswith(context_id_transaction_prefix) %}
+                      "transaction": "{{ trigger.event.data.context_id[context_id_transaction_prefix | length:] }}"
+                    {% endif %}
+                  }
+                }
           - choose:
             default: !input action_armed_night
       - conditions:
@@ -262,7 +303,15 @@ actions:
           - action: mqtt.publish
             data:
               topic: !input z2m_keypad_path_set
-              payload: "{\n \"arm_mode\": \n  {\n   \"mode\": \"entry_delay\"\n  }\n}"
+              payload: >
+                {
+                  "arm_mode": {
+                    "mode": "entry_delay"
+                    {% if trigger.event.data.context_id is not none and trigger.event.data.context_id.startswith(context_id_transaction_prefix) %}
+                      "transaction": "{{ trigger.event.data.context_id[context_id_transaction_prefix | length:] }}"
+                    {% endif %}
+                  }
+                }
           - choose:
             default: !input action_pending
       - conditions:
@@ -272,7 +321,15 @@ actions:
           - action: mqtt.publish
             data:
               topic: !input z2m_keypad_path_set
-              payload: "{\n \"arm_mode\": \n  {\n   \"mode\": \"in_alarm\"\n  }\n}"
+              payload: >
+                {
+                  "arm_mode": {
+                    "mode": "in_alarm"
+                    {% if trigger.event.data.context_id is not none and trigger.event.data.context_id.startswith(context_id_transaction_prefix) %}
+                      "transaction": "{{ trigger.event.data.context_id[context_id_transaction_prefix | length:] }}"
+                    {% endif %}
+                  }
+                }
           - choose:
             default: !input action_alarm
       - conditions:
@@ -291,6 +348,7 @@ actions:
                       entity_id: !input control_panel
                     data:
                       code: !input pin_control_panel
+                      context_id: "{{ context_id_transaction_prefix }}{{ trigger.payload_json.action_transaction }}"
               - conditions:
                   - condition: template
                     value_template:
@@ -302,6 +360,7 @@ actions:
                       entity_id: !input control_panel
                     data:
                       code: !input pin_control_panel
+                      context_id: "{{ context_id_transaction_prefix }}{{ trigger.payload_json.action_transaction }}"
               - conditions:
                   - condition: template
                     value_template:
@@ -313,6 +372,7 @@ actions:
                       entity_id: !input control_panel
                     data:
                       code: !input pin_control_panel
+                      context_id: "{{ context_id_transaction_prefix }}{{ trigger.payload_json.action_transaction }}"
               - conditions:
                   - condition: template
                     value_template:
@@ -324,6 +384,7 @@ actions:
                       entity_id: !input control_panel
                     data:
                       code: !input pin_control_panel
+                      context_id: "{{ context_id_transaction_prefix }}{{ trigger.payload_json.action_transaction }}"
               - conditions:
                   - condition: template
                     value_template: '{{ trigger.payload_json.action == "emergency" }}'
