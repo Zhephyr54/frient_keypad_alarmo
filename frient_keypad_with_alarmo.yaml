@@ -175,6 +175,12 @@ blueprint:
   source_url: https://github.com/Bygood91/frient_keypad_alarmo/blob/main/frient_keypad_with_alarmo.yaml
 variables:
   context_id_transaction_prefix: "1111111111"
+  context_id_transaction: >
+    {% if trigger.event and trigger.event.data and 'context_id' in trigger.event.data and (trigger.event.data.context_id | string).startswith(context_id_transaction_prefix) %}
+      {{ (trigger.event.data.context_id | string)[context_id_transaction_prefix | length:] }}
+    {% else %}
+      none
+    {% endif %}
   pin_list_var: !input pin_list
   pin_list: "{{ pin_list_var.split(';') }}"
   custom_pincode_1: !input custom_pincode_1
@@ -230,8 +236,8 @@ actions:
                 {
                   "arm_mode": {
                     "mode": "exit_delay"
-                    {% if trigger.event and trigger.event.data and 'context_id' in trigger.event.data and (trigger.event.data.context_id | string).startswith(context_id_transaction_prefix) %}
-                      , "transaction": "{{ trigger.event.data.context_id[context_id_transaction_prefix | length:] }}"
+                    {% if context_id_transaction != 'none' %}
+                      , "transaction": "{{ context_id_transaction }}"
                     {% endif %}
                   }
                 }
@@ -248,8 +254,8 @@ actions:
                 {
                   "arm_mode": {
                     "mode": "arm_all_zones"
-                    {% if trigger.event and trigger.event.data and 'context_id' in trigger.event.data and (trigger.event.data.context_id | string).startswith(context_id_transaction_prefix) %}
-                      , "transaction": "{{ trigger.event.data.context_id[context_id_transaction_prefix | length:] }}"
+                    {% if context_id_transaction != 'none' %}
+                      , "transaction": "{{ context_id_transaction }}"
                     {% endif %}
                   }
                 }
@@ -266,8 +272,8 @@ actions:
                 {
                   "arm_mode": {
                     "mode": "disarm"
-                    {% if trigger.event and trigger.event.data and 'context_id' in trigger.event.data and (trigger.event.data.context_id | string).startswith(context_id_transaction_prefix) %}
-                      , "transaction": "{{ trigger.event.data.context_id[context_id_transaction_prefix | length:] }}"
+                    {% if context_id_transaction != 'none' %}
+                      , "transaction": "{{ context_id_transaction }}"
                     {% endif %}
                   }
                 }
@@ -284,8 +290,8 @@ actions:
                 {
                   "arm_mode": {
                     "mode": "arm_day_zones"
-                    {% if trigger.event and trigger.event.data and 'context_id' in trigger.event.data and (trigger.event.data.context_id | string).startswith(context_id_transaction_prefix) %}
-                      , "transaction": "{{ trigger.event.data.context_id[context_id_transaction_prefix | length:] }}"
+                    {% if context_id_transaction != 'none' %}
+                      , "transaction": "{{ context_id_transaction }}"
                     {% endif %}
                   }
                 }
@@ -302,8 +308,8 @@ actions:
                 {
                   "arm_mode": {
                     "mode": "arm_night_zones"
-                    {% if trigger.event and trigger.event.data and 'context_id' in trigger.event.data and (trigger.event.data.context_id | string).startswith(context_id_transaction_prefix) %}
-                      , "transaction": "{{ trigger.event.data.context_id[context_id_transaction_prefix | length:] }}"
+                    {% if context_id_transaction != 'none' %}
+                      , "transaction": "{{ context_id_transaction }}"
                     {% endif %}
                   }
                 }
@@ -313,7 +319,7 @@ actions:
           - condition: trigger
             id: panel_failed_to_arm_open_sensors
           - condition: template
-            value_template: "{{ trigger.event and trigger.event.data and 'context_id' in trigger.event.data and (trigger.event.data.context_id | string).startswith(context_id_transaction_prefix) }}"
+            value_template: "{{ context_id_transaction != 'none' }}"
         sequence:
           - action: mqtt.publish
             data:
@@ -322,7 +328,7 @@ actions:
                 {
                   "arm_mode": {
                     "mode": "not_ready",
-                    "transaction": "{{ trigger.event.data.context_id[context_id_transaction_prefix | length:] }}"
+                    "transaction": "{{ context_id_transaction }}"
                   }
                 }
           - choose:
@@ -338,8 +344,8 @@ actions:
                 {
                   "arm_mode": {
                     "mode": "entry_delay"
-                    {% if trigger.event and trigger.event.data and 'context_id' in trigger.event.data and (trigger.event.data.context_id | string).startswith(context_id_transaction_prefix) %}
-                      , "transaction": "{{ trigger.event.data.context_id[context_id_transaction_prefix | length:] }}"
+                    {% if context_id_transaction != 'none' %}
+                      , "transaction": "{{ context_id_transaction }}"
                     {% endif %}
                   }
                 }
@@ -356,8 +362,8 @@ actions:
                 {
                   "arm_mode": {
                     "mode": "in_alarm"
-                    {% if trigger.event and trigger.event.data and 'context_id' in trigger.event.data and (trigger.event.data.context_id | string).startswith(context_id_transaction_prefix) %}
-                      , "transaction": "{{ trigger.event.data.context_id[context_id_transaction_prefix | length:] }}"
+                    {% if context_id_transaction != 'none' %}
+                      , "transaction": "{{ context_id_transaction }}"
                     {% endif %}
                   }
                 }
