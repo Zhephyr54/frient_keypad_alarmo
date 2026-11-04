@@ -6,7 +6,7 @@ blueprint:
     is transmitted to the keypad and vice versa."
   domain: automation
   homeassistant:
-    min_version: 2024.6.0
+    min_version: 2024.10.0
   input:
     keypad_mqtt:
       name: Keypad MQTT
@@ -29,8 +29,8 @@ blueprint:
           name: Keypad Pincode List
           description:
             "A list of valid PIN codes and RFID tags that can be accepted by
-            your keypad, separated by semicolons \" ; \".\n You can enter either a PIN code
-            or an RFID tag for authentication.\n For example: 1234; +ACF5678B"
+            your keypad, separated by semicolons \";\" (no spaces).\n You can enter either a PIN code
+            or an RFID tag for authentication.\n For example: 1234;+ACF5678B"
     control_panel:
       name: Control Panel
       description: "Manage Control Panel settings and actions triggered by state changes."
@@ -120,7 +120,7 @@ blueprint:
             action: {}
         action_alarm:
           name: Action Alarm
-          description: An action to be performed when alarm is triggered is pressed.
+          description: An action to be performed when the alarm is triggered.
           default: []
           selector:
             action: {}
@@ -147,8 +147,8 @@ blueprint:
       collapsed: true
       input:
         custom_pincode_2:
-          name: Pin Code Actn 2
-          description: "Enter the PIN code required to trigger custom action 1 via the keypad.\nYou can either use the same code from the keypad PIN code list or enter a new code that will launch this action."
+          name: Pin Code 2
+          description: "Enter the PIN code required to trigger custom action 2 via the keypad.\nYou can either use the same code from the keypad PIN code list or enter a new code that will launch this action."
           default: ""
         custom_action_2:
           name: Action for Pin Code 2
@@ -164,7 +164,7 @@ blueprint:
       input:
         custom_pincode_3:
           name: Pin Code 3
-          description: "Enter the PIN code required to trigger custom action 1 via the keypad.\nYou can either use the same code from the keypad PIN code list or enter a new code that will launch this action."
+          description: "Enter the PIN code required to trigger custom action 3 via the keypad.\nYou can either use the same code from the keypad PIN code list or enter a new code that will launch this action."
           default: ""
         custom_action_3:
           name: Action for Pin Code 3
@@ -193,6 +193,10 @@ triggers:
     entity_id: !input control_panel
     to: arming
     id: panel_arming
+  - trigger: state
+    entity_id: !input control_panel
+    to: armed_home
+    id: panel_armed_home
   - trigger: state
     entity_id: !input control_panel
     to: armed_night
@@ -372,6 +376,11 @@ actions:
       - conditions:
           - condition: trigger
             id: keypad_mqtt
+          # Ignore Z2M messages that are not keypad actions (battery, linkquality, tamper...)
+          - condition: template
+            value_template: >
+              {{ trigger.payload_json is defined
+                 and (trigger.payload_json.action | default('', true) | string) != '' }}
         sequence:
           - choose:
               - conditions:
@@ -429,21 +438,28 @@ actions:
                     default: !input action_panic
               - conditions:
                   - condition: template
-                    value_template: "{{ trigger.payload_json.action_code in custom_pincode_1 }}"
+                    value_template: >
+                      {{ custom_pincode_1 != ''
+                         and (trigger.payload_json.action_code | default('', true) | string) == custom_pincode_1 }}
                 sequence: !input "custom_action_1"
               - conditions:
                   - condition: template
-                    value_template: "{{ trigger.payload_json.action_code in custom_pincode_2 }}"
+                    value_template: >
+                      {{ custom_pincode_2 != ''
+                         and (trigger.payload_json.action_code | default('', true) | string) == custom_pincode_2 }}
                 sequence: !input "custom_action_2"
               - conditions:
                   - condition: template
-                    value_template: "{{ trigger.payload_json.action_code in custom_pincode_3 }}"
+                    value_template: >
+                      {{ custom_pincode_3 != ''
+                         and (trigger.payload_json.action_code | default('', true) | string) == custom_pincode_3 }}
                 sequence: !input "custom_action_3"
+              # Unknown code (numeric PIN or RFID tag): tell the keypad it is invalid
               - conditions:
                   - condition: template
-                    value_template:
-                      "{{ trigger.payload_json.action_code not in pin_list and trigger.payload_json.action_code not in pin_actions_list and
-                      trigger.payload_json.action_code | int(-1) != -1 }}"
+                    value_template: >
+                      {% set code = trigger.payload_json.action_code | default('', true) | string %}
+                      {{ code != '' and code not in pin_list and code not in pin_actions_list }}
                 sequence:
                   - action: mqtt.publish
                     data:
