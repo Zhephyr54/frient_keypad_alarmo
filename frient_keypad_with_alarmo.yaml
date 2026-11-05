@@ -176,7 +176,7 @@ blueprint:
 variables:
   context_id_transaction_prefix: "1111111111"
   context_id_transaction: >
-    {% if trigger.event and trigger.event.data and 'context_id' in trigger.event.data and (trigger.event.data.context_id | string).startswith(context_id_transaction_prefix) %}
+    {% if trigger.event is defined and trigger.event.data is defined and 'context_id' in trigger.event.data and (trigger.event.data.context_id | string).startswith(context_id_transaction_prefix) %}
       {{ (trigger.event.data.context_id | string)[context_id_transaction_prefix | length:] }}
     {% else %}
       none
